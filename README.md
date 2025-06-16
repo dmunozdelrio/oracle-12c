@@ -11,10 +11,13 @@ Oracle should be run in “privileged” mode as oracle requires special ports a
 However in real environment it's better to use more comprehensive statement useful for real life:
 ```sh
 $ docker run -d --name oracle \
-  --privileged -v $(pwd)/oradata:/u01/app/oracle \
-  -p 8080:8080 -p 1521:1521 absolutapps/oracle-12c-ee 
+  --privileged \
+  -v $(pwd)/oradata:/u01/app/oracle \
+  -v $(pwd)/networkadmin:/u01/app/oracle-product/12.1.0.2/dbhome_1/network/admin \
+  -p 8080:8080 -p 1521:1521 absolutapps/oracle-12c-ee
 ```
-In this case database settings and data will be saved to $(pwd)/oradata folder and ports will be exposed either to localhost or boot2docker container (MacOs and Win). 
+In this case database settings and data will be saved to $(pwd)/oradata folder and ports will be exposed either to localhost or boot2docker container (MacOs and Win).
+Network configuration files under $(pwd)/networkadmin will be mounted into the container so that listener and other network settings can be customized.
 
 ### Additional options
  - `ORACLE_SID` - Oracle SID (default to ORCL)
