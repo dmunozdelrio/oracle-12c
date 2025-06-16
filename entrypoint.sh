@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# ensure defaults for optional paths
+export TNS_ADMIN=${TNS_ADMIN:-$ORACLE_HOME/network/admin}
+export FORMS60_PATH=${FORMS60_PATH:-/path/to/forms}
+export REPORTS60_PATH=${REPORTS60_PATH:-/path/to/reports}
+
 sysctl -p > /dev/null 2>&1 || true
 
 chown -R oracle:oinstall $ORACLE_BASE 
@@ -11,9 +16,23 @@ ln -s /u01/app/oracle-product $ORACLE_BASE/product
 /u01/app/oraInventory/orainstRoot.sh > /dev/null 2>&1
 echo | $ORACLE_BASE/product/12.1.0.2/dbhome_1/root.sh  > /dev/null 2>&1 || true
 
+generate_tnsnames(){
+ gosu oracle cat > "$TNS_ADMIN/tnsnames.ora" <<EOF
+${SERVICE_NAME:-$ORACLE_SID} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = $(hostname))(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${SERVICE_NAME:-$ORACLE_SID})
+    )
+  )
+EOF
+}
+
 start_listener(){
- gosu oracle echo "LISTENER = (DESCRIPTION_LIST = (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = $(hostname))(PORT = 1521))))" > $ORACLE_HOME/network/admin/listener.ora
- gosu oracle echo "" > $ORACLE_HOME/network/admin/sqlnet.ora
+ gosu oracle echo "LISTENER = (DESCRIPTION_LIST = (DESCRIPTION = (ADDRESS = (PROTOCOL = TCP)(HOST = $(hostname))(PORT = 1521))))" > "$TNS_ADMIN/listener.ora"
+ gosu oracle echo "" > "$TNS_ADMIN/sqlnet.ora"
+ generate_tnsnames
  gosu oracle lsnrctl start
 }
 

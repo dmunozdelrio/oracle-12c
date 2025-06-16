@@ -15,14 +15,20 @@ $ docker run -d --name oracle \
   -p 8080:8080 -p 1521:1521 absolutapps/oracle-12c-ee 
 ```
 In this case database settings and data will be saved to $(pwd)/oradata folder and ports will be exposed either to localhost or boot2docker container (MacOs and Win). 
+Environment variables can be overridden at runtime using `-e VARIABLE=value` when invoking `docker run`.
+
 
 ### Additional options
- - `ORACLE_SID` - Oracle SID (default to ORCL)
- - `SERVICE_NAME`	- $ORACLE_SID
- - Listener port - 1521	 
- - EM port - 8080	 
- - SYS, SYSTEM passwords: oracle	 
- - Amount of memory	40%	`INIT_MEM_PST`
+ - `ORACLE_SID` - Oracle SID (default `ORCL`)
+ - `SERVICE_NAME` - service name used for connections (defaults to `ORACLE_SID`)
+ - `INIT_MEM_PST` - percentage of system memory dedicated to the database (default `40`)
+ - `SW_ONLY` - when `true`, install binaries only without creating a database
+ - `TNS_ADMIN` - path to network configuration files (default `$ORACLE_HOME/network/admin`)
+ - `FORMS60_PATH` - search path for Oracle Forms modules
+ - `REPORTS60_PATH` - search path for Oracle Reports modules
+ - Listener port - `1521`
+ - EM port - `8080`
+ - SYS, SYSTEM passwords: `oracle`
 
 ### Running scripts at startup
 Shell scripts (sh) and sql scripts (sql) placed in `/oracle.init.d/`directory will be executed after database creation (or start). 
