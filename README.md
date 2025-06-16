@@ -36,3 +36,31 @@ Shell scripts are executed as root. Please use “gosu” instead of “su - ”
 ### Using rlwrap
 This utility allows user to use history in sqlplus in the same way as with MySQL. Just use "rlwrap sqlplus" instead of "sqlplus" 
 
+
+### Connecting Oracle Forms/Reports 6i
+To use Oracle Forms or Reports 6i with the container you typically need to mount
+an additional network configuration directory and set a few environment
+variables so that the legacy client can resolve the database connection.
+
+Mount the following directories:
+- `./oradata` to `/u01/app/oracle` - persistent database files
+- `./network/admin` to `$ORACLE_HOME/network/admin` - custom `tnsnames.ora` and
+  other network configuration files
+
+Environment variables useful for the Forms/Reports 6i tools:
+- `ORACLE_SID` – database SID (defaults to `ORCL`)
+- `TNS_ADMIN` – location of your `tnsnames.ora` inside the container
+- `NLS_LANG` – optional language settings for the client
+
+Example run command with volume mounts and variable overrides:
+```sh
+$ docker run -d --name oracle \
+  --privileged \
+  -v $(pwd)/oradata:/u01/app/oracle \
+  -v $(pwd)/network/admin:$ORACLE_HOME/network/admin \
+  -e ORACLE_SID=ORCL \
+  -e TNS_ADMIN=$ORACLE_HOME/network/admin \
+  -e NLS_LANG=AMERICAN_AMERICA.UTF8 \
+  -p 8080:8080 -p 1521:1521 absolutapps/oracle-12c-ee
+```
+
